@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizMaster</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="page-login" class="page active">
+  <div class="login-box">
+    <h1>QuizMaster</h1>
+    <p>Silakan masuk untuk melanjutkan</p>
+    <div class="field"><label>Username</label><input id="inp-user" type="text" placeholder="Username" autocomplete="off"></div>
+    <div class="field"><label>Password</label><input id="inp-pass" type="password" placeholder="Password"></div>
+    <button class="btn-primary" onclick="doLogin()">Masuk</button>
+    <div class="error-msg" id="err-login">Username atau password salah.</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div class="navbar">
+    <div class="navbar-brand">QuizMaster</div>
+    <div class="navbar-right">
+      <span id="nav-name">—</span>
+      <span class="role-tag" id="nav-role"></span>
+      <button class="btn-link" onclick="confirmLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="container">
+    <div style="font-size:20px;font-weight:700;margin-bottom:4px">Dashboard</div>
+    <div style="font-size:13px;color:#888;margin-bottom:28px">Selamat datang, <span id="dash-name">—</span>!</div>
+    <div id="menu-grid"></div>
+    <div id="menu-notice"></div>
+  </div>
+</div>
+
+<!-- BUAT SOAL -->
+<div id="page-buat" class="page">
+  <div class="navbar">
+    <div class="navbar-brand">QuizMaster</div>
+    <div class="navbar-right"><span id="nav-name-buat">—</span><span class="role-tag role-admin">Admin</span></div>
+  </div>
+  <div class="page-header">
+    <button class="btn-back" onclick="showPage('dashboard')">← Kembali</button>
+    <h2>Buat Soal</h2>
+  </div>
+  <div class="container">
+
+    <!-- Form tambah/edit soal -->
+    <div class="form-box">
+      <h3 id="form-title">Tambah Soal</h3>
+      <input type="hidden" id="edit-idx" value="">
+
+      <label class="f-label">Paket Soal</label>
+      <select class="f-input" id="inp-paket-soal"></select>
+
+      <label class="f-label">Pertanyaan</label>
+      <textarea class="f-input" id="inp-soal" rows="3" placeholder="Tulis pertanyaan..."></textarea>
+
+      <label class="f-label">Pilihan Jawaban</label>
+      <div class="opts-grid">
+        <div class="opt-row"><div class="opt-letter">A</div><input id="opt-A" type="text" placeholder="Opsi A"></div>
+        <div class="opt-row"><div class="opt-letter">B</div><input id="opt-B" type="text" placeholder="Opsi B"></div>
+        <div class="opt-row"><div class="opt-letter">C</div><input id="opt-C" type="text" placeholder="Opsi C"></div>
+        <div class="opt-row"><div class="opt-letter">D</div><input id="opt-D" type="text" placeholder="Opsi D"></div>
+      </div>
+
+      <label class="f-label">Jawaban Benar</label>
+      <select class="f-input" id="inp-jawaban">
+        <option value="">-- Pilih --</option>
+        <option value="0">A</option><option value="1">B</option>
+        <option value="2">C</option><option value="3">D</option>
+      </select>
+
+      <div class="btn-row">
+        <button class="btn-sm" onclick="resetForm()">Batal</button>
+        <button class="btn-sm blue" id="btn-save-soal" onclick="saveSoal()">Simpan Soal</button>
+      </div>
+    </div>
+
+    <!-- Filter paket -->
+    <div style="margin-bottom:8px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px">Daftar Soal</div>
+      <div class="paket-bar" id="paket-tabs"></div>
+    </div>
+
+    <div class="soal-list-header">
+      <span class="soal-count" id="soal-count-label">0 soal</span>
+    </div>
+    <div id="soal-list"></div>
+  </div>
+</div>
+
+<!-- KERJAKAN SOAL -->
+<div id="page-kerjakan" class="page">
+  <div class="navbar">
+    <div class="navbar-brand">QuizMaster</div>
+    <div class="navbar-right"><span id="nav-name-kerjakan">—</span></div>
+  </div>
+  <div class="page-header">
+    <button class="btn-back" onclick="backFromKerjakan()">← Kembali</button>
+    <h2 id="kerjakan-title">Pilih Paket Soal</h2>
+  </div>
+  <div class="container" id="quiz-body"></div>
+</div>
+
+<!-- Modal: Konfirmasi logout -->
+<div class="modal-overlay" id="modal-logout">
+  <div class="modal">
+    <h3>Logout?</h3>
+    <p>Kamu akan keluar dari sesi ini.</p>
+    <div class="modal-btns">
+      <button class="btn-sm" onclick="closeModalLogout()">Batal</button>
+      <button class="btn-sm red" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tambah Paket -->
+<div class="modal-overlay" id="modal-paket">
+  <div class="modal">
+    <h3>Tambah Paket Soal</h3>
+    <p>Masukkan nama paket soal baru.</p>
+    <input type="text" id="inp-nama-paket" placeholder="Contoh: Ujian Tengah Semester...">
+    <div class="modal-btns">
+      <button class="btn-sm" onclick="closeModalPaket()">Batal</button>
+      <button class="btn-sm blue" onclick="confirmTambahPaket()">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Konfirmasi hapus soal -->
+<div class="modal-overlay" id="modal-hapus">
+  <div class="modal">
+    <h3>Hapus Soal?</h3>
+    <p>Soal ini akan dihapus permanen.</p>
+    <div class="modal-btns">
+      <button class="btn-sm" onclick="closeModalHapus()">Batal</button>
+      <button class="btn-sm red" onclick="confirmHapus()">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Konfirmasi hapus paket -->
+<div class="modal-overlay" id="modal-hapus-paket">
+  <div class="modal">
+    <h3>Hapus Paket?</h3>
+    <p id="modal-hapus-paket-msg">Paket beserta semua soalnya akan dihapus permanen.</p>
+    <div class="modal-btns">
+      <button class="btn-sm" onclick="closeModalHapusPaket()">Batal</button>
+      <button class="btn-sm red" onclick="confirmHapusPaket()">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
